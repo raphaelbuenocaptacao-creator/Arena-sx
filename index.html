@@ -44,7 +44,7 @@
     <div class="card">
       <h1>🏟️ Arena SX Online</h1>
       <p class="sub">Entre com e-mail e senha para ver desafios, ranking, XP Bank e feed compartilhado.</p>
-      <div class="note">Antes de publicar, cole sua <b>Publishable Key</b> no código onde está escrito <b>sb_publishable_VQynQJhjr8-f3n_uJXLX4g_HQsjH8EM</b>.</div>
+      <div class="note">Antes de publicar, cole sua <b>Publishable Key</b> no código onde está escrito <b>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwb2RrZWNna2xhcGF3YXV2bmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MjM4NDQsImV4cCI6MjA5NzA5OTg0NH0.ARwL6mt4u-hsTZZ2Pnyuw5x10VZxKDiAtwyLZzVJzmY</b>.</div>
     </div>
     <div class="card">
       <div class="title"><h2>Entrar / Criar conta</h2><span class="small">Supabase Auth</span></div>
@@ -105,7 +105,7 @@
 
 <script>
 const SUPABASE_URL = "https://rpodkecgklapawauvnan.supabase.co";
-const SUPABASE_KEY = "sb_publishable_VQynQJhjr8-f3n_uJXLX4g_HQsjH8EM";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwb2RrZWNna2xhcGF3YXV2bmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MjM4NDQsImV4cCI6MjA5NzA5OTg0NH0.ARwL6mt4u-hsTZZ2Pnyuw5x10VZxKDiAtwyLZzVJzmY";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const equipeRaphael=['Adriano','Ana Caroline','Daniela','Ivanilson','Jessica','Josyene','Larissa Ribeiro','Mateus Rosa','Mateus Esley','Pedro','Rebeca','Suenne','Marcio Alfaia','José Ademir'];
@@ -193,10 +193,10 @@ function todosNomes(){return [...new Set([...equipeRaphael,...equipeFrancisco,..
 function saldos(){let base={};todosNomes().forEach(n=>base[n]=500);lancamentos.forEach(l=>{if(l.usuario)base[l.usuario]=(base[l.usuario]??500)+Number(l.xp||0)});return base}
 
 async function addXP(){
-  let usuario=nome.value.trim(), tipo=tipo.value, valor=Number(xp.value||0), mot=motivo.value.trim();
+  let usuario=document.getElementById('nome').value.trim(), tipoValor=document.getElementById('tipo').value, valor=Number(document.getElementById('xp').value||0), mot=document.getElementById('motivo').value.trim();
   if(!usuario||!valor)return alert('Preencha nome e XP');
-  const xpFinal=tipo==='perda'?-Math.abs(valor):Math.abs(valor);
-  const {error}=await sb.from('xp_lancamentos').insert({usuario,tipo,xp:xpFinal,motivo:mot||'Lançamento manual'});
+  const xpFinal=tipoValor==='perda'?-Math.abs(valor):Math.abs(valor);
+  const {error}=await sb.from('xp_lancamentos').insert({usuario,tipo:tipoValor,xp:xpFinal,motivo:mot||'Lançamento manual'});
   if(error)return alert(error.message);
   nome.value=''; xp.value=''; motivo.value=''; await carregarTudo();
 }
