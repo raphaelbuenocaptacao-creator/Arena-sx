@@ -33,7 +33,7 @@
     .challenge{background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(250,204,21,.05));margin-bottom:10px}.challenge-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .status{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;background:#111827;border:1px solid var(--line)}
     .auth{min-height:100vh;display:grid;place-items:center;padding:18px}.authbox{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr;gap:14px}.hidden{display:none!important}
-    .userbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.footer{text-align:center;color:var(--muted);font-size:12px;margin:35px 0 10px}
+    .manage-list{display:grid;gap:10px}.prof-row{display:grid;grid-template-columns:1.2fr .7fr .5fr .5fr;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:10px;background:rgba(255,255,255,.035)}.prof-row.inativo{opacity:.55}.toggle-on{background:linear-gradient(135deg,#22c55e,#84cc16)}.toggle-off{background:linear-gradient(135deg,#ef4444,#f97316)}@media(max-width:1000px){.prof-row{grid-template-columns:1fr}}.userbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.footer{text-align:center;color:var(--muted);font-size:12px;margin:35px 0 10px}
     @media(max-width:1000px){.grid,.two,.three,.hero,.form,.authbox{grid-template-columns:1fr}.wrap{padding:14px}.hero h2{font-size:28px}h1{font-size:20px}}
   </style>
 </head>
@@ -89,7 +89,7 @@ Todos os profissionais iniciam com <b>500 XP</b>.
     <div class="grid"><div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Todos começam igual</div></div><div class="card kpi"><div class="label">Desafios</div><div class="num" id="kDesafios">0</div><div class="mini">Online</div></div><div class="card kpi"><div class="label">Usuários</div><div class="num" id="kUsuarios">0</div><div class="mini">Cadastrados</div></div><div class="card kpi"><div class="label">Feed</div><div class="num" id="kFeed">0</div><div class="mini">Mensagens</div></div></div>
   </section>
 
-  <section id="desafios" class="section"><div class="card"><div class="title"><h2>⚔️ Arena de Desafios</h2><span class="small">Todos veem online</span></div><div class="form"><input id="dCriador" placeholder="Quem criou"><input id="dContra" placeholder="Contra quem/equipe"><select id="dTipo"><option>Casais</option><option>Vendas</option><option>VGV</option><option>XP</option><option>Ponto de captação</option></select><input id="dMeta" type="number" placeholder="Meta do desafio"><input id="dAposta" type="number" placeholder="XP apostado"><button onclick="criarDesafio()">Criar desafio</button></div><div id="listaDesafios"></div></div></section>
+  <section id="desafios" class="section"><div class="card"><div class="title"><h2>⚔️ Arena de Desafios</h2><span class="small">Todos veem online • só CEO/Admin confirma vencedor</span></div><div class="form"><input id="dCriador" placeholder="Quem criou"><input id="dContra" placeholder="Contra quem/equipe"><select id="dTipo"><option>Casais</option><option>Vendas</option><option>VGV</option><option>XP</option><option>Ponto de captação</option></select><input id="dMeta" type="number" placeholder="Meta do desafio"><input id="dAposta" type="number" placeholder="XP apostado"><button onclick="criarDesafio()">Criar desafio</button></div><div id="listaDesafios"></div></div></section>
 
   <section id="regras" class="section"><div class="two"><div class="card"><div class="title"><h2>✅ Ganhos de XP</h2></div><table><tbody><tr><td>Casal colocado</td><td class="ok">+50</td></tr><tr><td>Venda realizada</td><td class="ok">+300</td></tr><tr><td>Top 1 casais</td><td class="ok">+500</td></tr><tr><td>Meta individual</td><td class="ok">+1000</td></tr></tbody></table></div><div class="card"><div class="title"><h2>❌ Perdas de XP</h2></div><table><tbody><tr><td>Atraso</td><td class="bad">-50</td></tr><tr><td>Falta</td><td class="bad">-100</td></tr><tr><td>Casal sem perfil</td><td class="bad">-100</td></tr><tr><td>Indisciplina</td><td class="bad">-200</td></tr></tbody></table></div></div></section>
 
@@ -99,7 +99,14 @@ Todos os profissionais iniciam com <b>500 XP</b>.
 
   <section id="perfil" class="section"><div class="card"><div class="title"><h2>👤 Perfil individual</h2><span class="small">Busca pelo nome</span></div><div class="form"><input id="perfilBusca" placeholder="Digite o nome"><button onclick="buscarPerfil()">Buscar Perfil</button></div><div id="perfilResultado"></div></div></section>
 
-  <section id="equipes" class="section"><div class="two"><div class="card"><div class="title"><h2>👥 Equipe Raphael Bueno</h2></div><div class="member-tags" id="eqRaphael"></div></div><div class="card"><div class="title"><h2>👥 Equipe Francisco</h2></div><div class="member-tags" id="eqFrancisco"></div></div></div></section>
+  <section id="equipes" class="section">
+    <div class="two">
+      <div class="card"><div class="title"><h2>👥 Equipe Raphael Bueno</h2><span class="small" id="countRaphael"></span></div><div class="member-tags" id="eqRaphael"></div></div>
+      <div class="card"><div class="title"><h2>👥 Equipe Francisco</h2><span class="small" id="countFrancisco"></span></div><div class="member-tags" id="eqFrancisco"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="title"><h2>📋 Todos os profissionais ativos</h2><span class="small" id="countAtivos"></span></div><div class="member-tags" id="eqTodos"></div></div>
+    <div class="card" style="margin-top:14px"><div class="title"><h2>🚫 Inativos / fora da equipe</h2><span class="small" id="countInativos"></span></div><div class="member-tags" id="eqInativos"></div></div>
+  </section>
 
   <section id="feed" class="section"><div class="card"><div class="title"><h2>💬 Feed da Arena</h2><span class="small">Online</span></div><div class="form"><input id="feedNome" placeholder="Nome"><input id="feedMsg" placeholder="Mensagem"><button onclick="postFeed()">Publicar</button></div><div id="feedList" class="list" style="margin-top:14px"></div></div></section>
 
@@ -107,7 +114,20 @@ Todos os profissionais iniciam com <b>500 XP</b>.
 
   <section id="premios" class="section"><div class="card"><div class="title"><h2>🎁 Loja de Prêmios XP</h2></div><table><thead><tr><th>Prêmio</th><th>Custo XP</th><th>Observação</th></tr></thead><tbody><tr><td>Voucher R$ 50</td><td>1000 XP</td><td>Aprovação gestor</td></tr><tr><td>Voucher R$ 100</td><td>1800 XP</td><td>Aprovação gestor</td></tr><tr><td>Folga programada</td><td>3000 XP</td><td>Combinada</td></tr><tr><td>Almoço especial</td><td>2500 XP</td><td>Individual ou equipe</td></tr></tbody></table></div></section>
 
-  <section id="admin" class="section"><div class="card"><div class="title"><h2>⚙️ Painel do Gestor</h2></div><div class="note">Admin online. Para limpar dados, apague pelo Supabase Table Editor. Para segurança profissional, depois ative RLS e políticas por usuário.</div><button onclick="carregarTudo()">Atualizar tudo</button></div></section>
+  <section id="admin" class="section">
+    <div class="card">
+      <div class="title"><h2>⚙️ Painel do Gestor</h2><span class="small">Ativar / desativar profissionais</span></div>
+      <div class="note">Use este painel para deixar ativo quem está na equipe e desativar quem saiu. Inativos não aparecem no ranking nem nas equipes, mas ficam salvos no banco.</div>
+      <div class="form">
+        <input id="novoProfNome" placeholder="Nome do profissional">
+        <input id="novoProfEquipe" placeholder="Equipe: Raphael, Francisco ou Sem equipe">
+        <button onclick="adicionarProfissional()">Adicionar profissional</button>
+        <button class="goldbtn" onclick="seedProfissionais(true)">Sincronizar lista padrão</button>
+        <button onclick="carregarTudo()">Atualizar tudo</button>
+      </div>
+      <div id="adminProfissionais" class="manage-list"></div>
+    </div>
+  </section>
 
   <div class="footer">Arena SX • Supabase Online • Pulse Bank • Desafios • XP</div>
 </main>
@@ -118,12 +138,209 @@ const SUPABASE_URL = "https://rpodkecgklapawauvnan.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwb2RrZWNna2xhcGF3YXV2bmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MjM4NDQsImV4cCI6MjA5NzA5OTg0NH0.ARwL6mt4u-hsTZZ2Pnyuw5x10VZxKDiAtwyLZzVJzmY";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const equipeRaphael=['Adriano','Ana Caroline','Daniela','Ivanilson','Jessica','Josyene','Larissa Ribeiro','Mateus Rosa','Mateus Esley','Pedro','Rebeca','Suenne','Marcio Alfaia','José Ademir'];
-const equipeFrancisco=['Ricardo','Renan','Mateus Domingos','Jonatas','João Francisco','Felipe Sub Líder','André','Alexandre'];
+const DEFAULT_PROFISSIONAIS = [
+  {
+    "nome": "ADRIANO MOREIRA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "AGNALDO FIRMINO JUNIOR",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "ALEXANDRE PASQUALE JUNIOR",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "AMANDA CONCEICAO DA COSTA",
+    "equipe": "Sem equipe",
+    "ativo": false
+  },
+  {
+    "nome": "ANA CAROLINE",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "ANDRE CARRIÇO",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "DANIELA MOURA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "FELIPE DA SILVA RIBEIRO",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "FRANCISCO ANTONIO RODRIGUES",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "FRANCISCO HERMESON BATISTA DOS",
+    "equipe": "Sem equipe",
+    "ativo": false
+  },
+  {
+    "nome": "GUILHERME CIRQUEIRA LEAO",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "IGOR SENA DOS SANTOS",
+    "equipe": "Sem equipe",
+    "ativo": false
+  },
+  {
+    "nome": "IVANILSON LUIZ AGUIAR LIMA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "JESSICA BARBOSA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "JONATAS FRANÇA DA SILVA",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "JOSE ADEMIR SILVA TAVARES",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "JOSYENE FREITAS",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "LARISSA RIBEIRO",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "LARISSA VITORIA",
+    "equipe": "Sem equipe",
+    "ativo": false
+  },
+  {
+    "nome": "LUAN DOS SANTOS S. FIRMINO",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "MARCELO HENRIQUE DE CAMPOS",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "MARCIO ALFAIA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "MATEUS SANTOS SANTA ROSA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "MATHEUS DOMINGOS SANTOS",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "MATHEUS ESLEY SILVA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "NICK VITORIA",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "PEDRO HENRIQUE GOMES SANTOS",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "RAPHAEL BUENO DA SILVA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "REBECA BRAGA PINTO",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "RENAN MARCONDES JOHAS",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "RICARDO MALTCHIK",
+    "equipe": "Francisco",
+    "ativo": true
+  },
+  {
+    "nome": "ROBSON ALLAN DO NASCIMENTO",
+    "equipe": "Sem equipe",
+    "ativo": false
+  },
+  {
+    "nome": "SERGIO CEZAR DA SILVA",
+    "equipe": "Sem equipe",
+    "ativo": true
+  },
+  {
+    "nome": "SUENE CINTIA DA SILVA",
+    "equipe": "Raphael",
+    "ativo": true
+  },
+  {
+    "nome": "TASSIANE RENATA MUGNOLI",
+    "equipe": "Sem equipe",
+    "ativo": false
+  }
+];
+const equipeRaphael = DEFAULT_PROFISSIONAIS.filter(p=>p.equipe==='Raphael').map(p=>p.nome);
+const equipeFrancisco = DEFAULT_PROFISSIONAIS.filter(p=>p.equipe==='Francisco').map(p=>p.nome);
 let currentUser=null, currentProfile=null, profiles=[], lancamentos=[], desafios=[], feed=[];
 
 function msg(t){authMsg.textContent=t||''}
 function nomeAtual(){return currentProfile?.nome || currentUser?.email || 'Usuário'}
+
+function slugEmail(nome){
+  return String(nome||'profissional')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'.').replace(/(^\.|\.$)/g,'') + '@arena.local';
+}
+function isAdmin(){return currentProfile?.role==='admin' || currentProfile?.role==='CEO' || currentUser?.email==='raphaelbueno.captacao@gmail.com'}
+function isAtivo(p){return p && p.role !== 'inativo'}
+function activeProfiles(){return profiles.filter(isAtivo)}
+async function seedProfissionais(forcarMensagem=false){
+  const existentes = new Set((profiles||[]).map(p=>String(p.email||'').toLowerCase()));
+  const rows = DEFAULT_PROFISSIONAIS
+    .map(p=>({email:slugEmail(p.nome), nome:p.nome, role:p.ativo?'profissional':'inativo', xp:500, equipe:p.equipe}))
+    .filter(p=>!existentes.has(p.email.toLowerCase()));
+  if(rows.length){
+    const {error}=await sb.from('profiles').insert(rows);
+    if(error){ console.log(error); if(forcarMensagem) alert(error.message); return; }
+    await carregarTudo();
+  } else if(forcarMensagem){ alert('Lista padrão já está sincronizada.'); }
+}
 
 async function signup(){
   const nome=authNome.value.trim(), equipe=authEquipe.value.trim(), email=authEmail.value.trim(), senha=authSenha.value;
@@ -147,7 +364,7 @@ async function login(){
 async function logout(){ await sb.auth.signOut(); location.reload(); }
 
 async function upsertProfile(nome,email,equipe){
-  await sb.from('profiles').upsert({email,nome,role: email==='raphaelbueno.captacao@gmail.com'?'admin':'usuario',xp:500,equipe},{onConflict:'email'});
+  await sb.from('profiles').upsert({email,nome,role: email==='raphaelbueno.captacao@gmail.com'?'CEO':'usuario',xp:500,equipe},{onConflict:'email'});
 }
 
 async function garantirProfile(){
@@ -168,6 +385,8 @@ async function iniciar(){
   currentUser=session?.user || currentUser;
   if(!currentUser){authScreen.classList.remove('hidden');app.classList.add('hidden');return}
   await garantirProfile();
+  await carregarTudo();
+  await seedProfissionais(false);
   authScreen.classList.add('hidden');app.classList.remove('hidden');
   dCriador.value=nomeAtual(); feedNome.value=nomeAtual(); nome.value=nomeAtual(); perfilBusca.value=nomeAtual();
   await carregarTudo();
@@ -199,8 +418,8 @@ function openTab(id,el){document.querySelectorAll('.section').forEach(s=>s.class
 function moeda(n){return Number(n||0).toLocaleString('pt-BR')+' XP'}
 function dataBR(x){return x?new Date(x).toLocaleString('pt-BR'):'-'}
 
-function todosNomes(){return [...new Set([...equipeRaphael,...equipeFrancisco,...profiles.map(x=>x.nome),...lancamentos.map(x=>x.usuario)].filter(Boolean))]}
-function saldos(){let base={};todosNomes().forEach(n=>base[n]=500);lancamentos.forEach(l=>{if(l.usuario)base[l.usuario]=(base[l.usuario]??500)+Number(l.xp||0)});return base}
+function todosNomes(){return [...new Set([...activeProfiles().map(x=>x.nome),...lancamentos.map(x=>x.usuario)].filter(Boolean))]}
+function saldos(){let base={};todosNomes().forEach(n=>base[n]=500);lancamentos.forEach(l=>{if(l.usuario && base[l.usuario]!==undefined)base[l.usuario]=(base[l.usuario]??500)+Number(l.xp||0)});return base}
 
 async function addXP(){
   let usuario=document.getElementById('nome').value.trim(), tipoValor=document.getElementById('tipo').value, valor=Number(document.getElementById('xp').value||0), mot=document.getElementById('motivo').value.trim();
@@ -228,19 +447,36 @@ async function criarDesafio(){
   dContra.value='';dMeta.value='';dAposta.value=''; await carregarTudo();
 }
 
-async function encerrarDesafio(id,vencedor,tipoD,aposta){
+async async function encerrarDesafio(id,vencedor,tipoD,aposta){
+  if(!isAdmin()) return alert('Somente o CEO/Admin pode confirmar o vencedor do desafio.');
+  const ok = confirm('Confirmar vencedor: ' + vencedor + '?');
+  if(!ok) return;
   const {error}=await sb.from('desafios').update({status:'encerrado',vencedor}).eq('id',id);
   if(error)return alert(error.message);
   if(Number(aposta)>0){
     await sb.from('xp_lancamentos').insert({usuario:vencedor,tipo:'ganho',xp:Math.abs(Number(aposta)),motivo:'Venceu desafio: '+tipoD});
   }
+  await sb.from('feed').insert({usuario:'Arena SX',mensagem:'🏆 Desafio encerrado pelo CEO/Admin. Vencedor: '+vencedor+' | Tipo: '+tipoD});
   await carregarTudo();
 }
 
 function renderDesafios(){
-  listaDesafios.innerHTML=desafios.length?desafios.map(d=>`<div class="challenge"><div class="challenge-head"><b>⚔️ ${d.criador} X ${d.adversario}</b><span class="status">${d.status}</span></div><div class="small">${dataBR(d.created_at)}</div><p><b>Tipo:</b> ${d.tipo} • <b>Meta:</b> ${d.meta} • <b>Aposta:</b> ${moeda(d.aposta_xp)}</p>${d.status==='aberto'?`<button onclick="encerrarDesafio('${d.id}','${String(d.criador).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Venceu ${d.criador}</button> <button class="success" onclick="encerrarDesafio('${d.id}','${String(d.adversario).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Venceu ${d.adversario}</button>`:`<span class="pill">🏆 Vencedor: ${d.vencedor||'-'}</span>`}</div>`).join(''):'<div class="note">Nenhum desafio criado ainda.</div>'
+  listaDesafios.innerHTML = desafios.length ? desafios.map(d=>{
+    const aberto = d.status === 'aberto';
+    const botoesAdmin = aberto && isAdmin()
+      ? `<button onclick="encerrarDesafio('${d.id}','${String(d.criador).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Confirmar ${d.criador}</button>
+         <button class="success" onclick="encerrarDesafio('${d.id}','${String(d.adversario).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Confirmar ${d.adversario}</button>`
+      : aberto
+        ? `<div class="note">⏳ Aguardando confirmação do CEO/Admin. Somente Raphael pode definir quem ganhou ou perdeu.</div>`
+        : `<span class="pill">🏆 Vencedor: ${d.vencedor||'-'}</span>`;
+    return `<div class="challenge">
+      <div class="challenge-head"><b>⚔️ ${d.criador} X ${d.adversario}</b><span class="status">${d.status}</span></div>
+      <div class="small">${dataBR(d.created_at)}</div>
+      <p><b>Tipo:</b> ${d.tipo} • <b>Meta:</b> ${d.meta} • <b>Aposta:</b> ${moeda(d.aposta_xp)}</p>
+      ${botoesAdmin}
+    </div>`;
+  }).join('') : '<div class="note">Nenhum desafio criado ainda.</div>';
 }
-
 function renderBank(){
   let s=saldos(), vals=Object.values(s), total=vals.reduce((a,b)=>a+b,0), max=vals.length?Math.max(...vals):0;
   bankResumo.innerHTML=`<div class="card kpi"><div class="label">Profissionais</div><div class="num">${Object.keys(s).length}</div><div class="mini">Com saldo XP</div></div><div class="card kpi"><div class="label">XP total</div><div class="num">${moeda(total)}</div><div class="mini">Somado</div></div><div class="card kpi"><div class="label">Maior saldo</div><div class="num">${moeda(max)}</div><div class="mini">Top da Arena</div></div><div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Padrão</div></div>`;
@@ -261,7 +497,17 @@ function buscarPerfil(){
   perfilResultado.innerHTML=`<div class="grid"><div class="card kpi"><div class="label">Profissional</div><div class="num">${n}</div></div><div class="card kpi"><div class="label">Saldo XP</div><div class="num">${moeda(saldo)}</div></div><div class="card kpi"><div class="label">Lançamentos</div><div class="num">${hist.length}</div></div><div class="card kpi"><div class="label">Status</div><div class="num">${saldo>=1000?'Elite':'Evolução'}</div></div></div><div style="margin-top:14px">${hist.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>XP</th><th>Motivo</th></tr></thead><tbody>${hist.map(l=>`<tr><td>${dataBR(l.created_at)}</td><td>${l.tipo}</td><td>${l.xp}</td><td>${l.motivo||''}</td></tr>`).join('')}</tbody></table>`:'<div class="note">Sem lançamentos ainda.</div>'}</div>`;
 }
 
-function renderEquipes(){eqRaphael.innerHTML=equipeRaphael.map(x=>`<span>${x}</span>`).join('');eqFrancisco.innerHTML=equipeFrancisco.map(x=>`<span>${x}</span>`).join('')}
+function renderEquipes(){
+  const ativos=activeProfiles().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const inativos=profiles.filter(p=>!isAtivo(p)).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const raphael=ativos.filter(p=>String(p.equipe||'').toLowerCase().includes('raphael'));
+  const francisco=ativos.filter(p=>String(p.equipe||'').toLowerCase().includes('francisco'));
+  eqRaphael.innerHTML=raphael.map(p=>`<span>${p.nome}</span>`).join('') || '<span>Nenhum ativo</span>';
+  eqFrancisco.innerHTML=francisco.map(p=>`<span>${p.nome}</span>`).join('') || '<span>Nenhum ativo</span>';
+  eqTodos.innerHTML=ativos.map(p=>`<span>${p.nome} • ${p.equipe||'Sem equipe'}</span>`).join('') || '<span>Nenhum ativo</span>';
+  eqInativos.innerHTML=inativos.map(p=>`<span>${p.nome}</span>`).join('') || '<span>Nenhum inativo</span>';
+  countRaphael.textContent=raphael.length+' ativos'; countFrancisco.textContent=francisco.length+' ativos'; countAtivos.textContent=ativos.length+' ativos'; countInativos.textContent=inativos.length+' inativos';
+}
 
 async function postFeed(){
   let usuario=feedNome.value.trim()||nomeAtual(), mensagem=feedMsg.value.trim(); if(!mensagem)return;
@@ -271,7 +517,46 @@ async function postFeed(){
 }
 function renderFeed(){feedList.innerHTML=feed.length?feed.map(p=>`<div class="feed-post"><b>${p.usuario}</b><br>${p.mensagem}<br><span class="small">${dataBR(p.created_at)} • Arena SX</span></div>`).join(''):'<div class="note">Nenhuma mensagem ainda.</div>'}
 
-function renderAll(){kDesafios.textContent=desafios.length;kUsuarios.textContent=profiles.length;kFeed.textContent=feed.length;renderDesafios();renderBank();renderRanking();renderEquipes();renderFeed()}
+
+async function adicionarProfissional(){
+  const nomeNovo=novoProfNome.value.trim();
+  const equipeNova=novoProfEquipe.value.trim()||'Sem equipe';
+  if(!nomeNovo)return alert('Digite o nome do profissional.');
+  const email=slugEmail(nomeNovo);
+  const {error}=await sb.from('profiles').upsert({email,nome:nomeNovo.toUpperCase(),role:'profissional',xp:500,equipe:equipeNova},{onConflict:'email'});
+  if(error)return alert(error.message);
+  novoProfNome.value=''; novoProfEquipe.value='';
+  await carregarTudo();
+}
+async function toggleProfissional(email, ativoAtual){
+  const novoRole = ativoAtual ? 'inativo' : 'profissional';
+  const {error}=await sb.from('profiles').update({role:novoRole}).eq('email',email);
+  if(error)return alert(error.message);
+  await carregarTudo();
+}
+async function mudarEquipe(email, equipe){
+  const {error}=await sb.from('profiles').update({equipe}).eq('email',email);
+  if(error)return alert(error.message);
+  await carregarTudo();
+}
+function renderAdminProfissionais(){
+  if(!adminProfissionais)return;
+  const lista=[...profiles].sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  adminProfissionais.innerHTML = lista.map(p=>{
+    const ativo=isAtivo(p);
+    return `<div class="prof-row ${ativo?'':'inativo'}">
+      <div><b>${p.nome||p.email}</b><br><span class="small">${p.email||''}</span></div>
+      <select onchange="mudarEquipe('${p.email}',this.value)">
+        <option ${p.equipe==='Raphael'?'selected':''}>Raphael</option>
+        <option ${p.equipe==='Francisco'?'selected':''}>Francisco</option>
+        <option ${p.equipe==='Sem equipe'||!p.equipe?'selected':''}>Sem equipe</option>
+      </select>
+      <span class="${ativo?'ok':'bad'}">${ativo?'ATIVO':'INATIVO'}</span>
+      <button class="${ativo?'toggle-off':'toggle-on'}" onclick="toggleProfissional('${p.email}',${ativo})">${ativo?'Desativar':'Ativar'}</button>
+    </div>`;
+  }).join('') || '<div class="note">Nenhum profissional cadastrado.</div>';
+}
+function renderAll(){kDesafios.textContent=desafios.length;kUsuarios.textContent=profiles.length;kFeed.textContent=feed.length;renderDesafios();renderBank();renderRanking();renderEquipes();renderFeed();renderAdminProfissionais()}
 iniciar();
 </script>
 </body>
