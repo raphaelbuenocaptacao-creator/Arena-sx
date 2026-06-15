@@ -3,25 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arena SX | Pulse Bank, Desafios e XP</title>
+  <title>Arena SX Online | Supabase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{
-      --bg:#05060a;--panel:#10131d;--panel2:#161b29;--text:#f8fafc;--muted:#98a2b3;
-      --accent:#00e5ff;--blue:#2563eb;--gold:#facc15;--green:#22c55e;--red:#ef4444;
-      --orange:#f97316;--line:#252b3a;--card:rgba(255,255,255,.055);
-      --shadow:0 20px 60px rgba(0,0,0,.45)
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
+    :root{--bg:#05060a;--panel:#10131d;--panel2:#161b29;--text:#f8fafc;--muted:#98a2b3;--accent:#00e5ff;--blue:#2563eb;--gold:#facc15;--green:#22c55e;--red:#ef4444;--orange:#f97316;--line:#252b3a;--card:rgba(255,255,255,.055);--shadow:0 20px 60px rgba(0,0,0,.45)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
     body{margin:0;background:radial-gradient(circle at top left,#142033 0,#05060a 38%,#02030a 100%);font-family:Inter,Arial,sans-serif;color:var(--text)}
-    header{position:sticky;top:0;z-index:20;background:rgba(5,6,10,.90);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:18px 22px}
-    .top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
-    h1{font-size:24px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:5px}
+    header{position:sticky;top:0;z-index:20;background:rgba(5,6,10,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:18px 22px}
+    .top{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}h1{font-size:24px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:5px}
     .badge{border:1px solid var(--line);border-radius:999px;padding:10px 14px;background:#0b0e17;color:#dbeafe;font-weight:900}
     .wrap{padding:22px;max-width:1500px;margin:auto}.tabs{display:flex;gap:10px;overflow:auto;padding-bottom:10px;margin:8px 0 18px}
     .tab{white-space:nowrap;padding:11px 16px;border:1px solid var(--line);border-radius:999px;background:#0b0e17;color:var(--muted);cursor:pointer;font-weight:900}
-    .tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#111827;border:0}
-    .section{display:none}.section.active{display:block}
+    .tab.active{background:linear-gradient(135deg,#facc15,#f59e0b);color:#111827;border:0}.section{display:none}.section.active{display:block}
     .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
     .title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.title h2{font-size:18px;margin:0}.small{color:var(--muted);font-size:12px}
@@ -30,220 +23,246 @@
     .pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:#101827;border:1px solid var(--line);font-size:12px;color:#dbeafe;margin:3px}
     table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}tr:hover{background:rgba(255,255,255,.04)}
     .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-bottom:14px}.hero h2{font-size:38px;margin:0 0 8px}.hero p{color:#dbeafe;line-height:1.6}
-    .progress{height:12px;background:#0b0e17;border:1px solid var(--line);border-radius:999px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#00e5ff,#facc15);width:65%}
-    .timeline{display:grid;gap:10px}.step{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(255,255,255,.035)}
-    .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#00e5ff,#2563eb);font-weight:900;color:#001018;flex:0 0 34px}
     .note{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);line-height:1.55;color:#dbeafe}
     .form{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
     input,select,button,textarea{border:1px solid var(--line);background:#0b0e17;color:var(--text);padding:12px;border-radius:14px;outline:none}
     button{cursor:pointer;background:linear-gradient(135deg,#00e5ff,#2563eb);border:0;font-weight:950;color:#001018}
     .danger{background:linear-gradient(135deg,#ef4444,#f97316)}.success{background:linear-gradient(135deg,#22c55e,#84cc16)}.goldbtn{background:linear-gradient(135deg,#facc15,#f97316)}
-    .list{display:grid;gap:10px}.feed-post{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.04)}.feed-post b{color:var(--gold)}
+    .list{display:grid;gap:10px}.feed-post,.challenge{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.04)}.feed-post b{color:var(--gold)}
     .member-tags{display:flex;flex-wrap:wrap;gap:8px}.member-tags span{padding:8px 12px;border-radius:999px;background:#0b0e17;border:1px solid var(--line);color:#dbeafe;font-size:13px}
-    .challenge{border:1px solid var(--line);border-radius:18px;padding:14px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(250,204,21,.05));margin-bottom:10px}
-    .challenge-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.status{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;background:#111827;border:1px solid var(--line)}
-    .footer{text-align:center;color:var(--muted);font-size:12px;margin:35px 0 10px}
-    @media(max-width:1000px){.grid,.two,.three,.hero,.form{grid-template-columns:1fr}.wrap{padding:14px}.hero h2{font-size:28px}h1{font-size:20px}}
+    .challenge{background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(250,204,21,.05));margin-bottom:10px}.challenge-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .status{padding:5px 9px;border-radius:999px;font-size:12px;font-weight:900;background:#111827;border:1px solid var(--line)}
+    .auth{min-height:100vh;display:grid;place-items:center;padding:18px}.authbox{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr;gap:14px}.hidden{display:none!important}
+    .userbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.footer{text-align:center;color:var(--muted);font-size:12px;margin:35px 0 10px}
+    @media(max-width:1000px){.grid,.two,.three,.hero,.form,.authbox{grid-template-columns:1fr}.wrap{padding:14px}.hero h2{font-size:28px}h1{font-size:20px}}
   </style>
 </head>
 <body>
+
+<div id="authScreen" class="auth">
+  <div class="authbox">
+    <div class="card">
+      <h1>🏟️ Arena SX Online</h1>
+      <p class="sub">Entre com e-mail e senha para ver desafios, ranking, XP Bank e feed compartilhado.</p>
+      <div class="note">Antes de publicar, cole sua <b>Publishable Key</b> no código onde está escrito <b>COLE_SUA_PUBLISHABLE_KEY_AQUI</b>.</div>
+    </div>
+    <div class="card">
+      <div class="title"><h2>Entrar / Criar conta</h2><span class="small">Supabase Auth</span></div>
+      <div class="form" style="grid-template-columns:1fr">
+        <input id="authNome" placeholder="Nome completo">
+        <input id="authEquipe" placeholder="Equipe. Ex: Raphael ou Francisco">
+        <input id="authEmail" type="email" placeholder="E-mail">
+        <input id="authSenha" type="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <button class="success" onclick="signup()">Criar conta</button>
+      </div>
+      <div id="authMsg" class="small"></div>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
 <header>
   <div class="top">
-    <div>
-      <h1>🏟️ Arena SX — Pulse Bank, Desafios e XP</h1>
-      <div class="sub">Sistema interno de competição comercial: metas, XP, banco, ranking, equipes, desafios, feed e premiações.</div>
-    </div>
-    <div class="badge">🔥 Todos começam com 500 XP</div>
+    <div><h1>🏟️ Arena SX — Pulse Bank, Desafios e XP</h1><div class="sub">Sistema online com Supabase: login, desafios, XP, ranking e feed para toda a equipe.</div></div>
+    <div class="userbar"><div class="badge" id="usuarioLogado">Carregando...</div><button class="danger" onclick="logout()">Sair</button></div>
   </div>
 </header>
 
 <main class="wrap">
   <div class="tabs">
-    <div class="tab active" onclick="openTab('home',this)">Início</div>
-    <div class="tab" onclick="openTab('desafios',this)">⚔️ Desafios</div>
-    <div class="tab" onclick="openTab('competicoes',this)">Competições</div>
-    <div class="tab" onclick="openTab('regras',this)">Regras XP</div>
-    <div class="tab" onclick="openTab('banco',this)">Pulse Bank</div>
-    <div class="tab" onclick="openTab('ranking',this)">Ranking</div>
-    <div class="tab" onclick="openTab('perfil',this)">Perfil</div>
-    <div class="tab" onclick="openTab('equipes',this)">Equipes</div>
-    <div class="tab" onclick="openTab('feed',this)">Feed</div>
-    <div class="tab" onclick="openTab('hall',this)">Hall da Fama</div>
-    <div class="tab" onclick="openTab('premios',this)">Prêmios</div>
-    <div class="tab" onclick="openTab('admin',this)">Admin</div>
+    <div class="tab active" onclick="openTab('home',this)">Início</div><div class="tab" onclick="openTab('desafios',this)">⚔️ Desafios</div><div class="tab" onclick="openTab('regras',this)">Regras XP</div><div class="tab" onclick="openTab('banco',this)">Pulse Bank</div><div class="tab" onclick="openTab('ranking',this)">Ranking</div><div class="tab" onclick="openTab('perfil',this)">Perfil</div><div class="tab" onclick="openTab('equipes',this)">Equipes</div><div class="tab" onclick="openTab('feed',this)">Feed</div><div class="tab" onclick="openTab('hall',this)">Hall da Fama</div><div class="tab" onclick="openTab('premios',this)">Prêmios</div><div class="tab" onclick="openTab('admin',this)">Admin</div>
   </div>
 
   <section id="home" class="section active">
-    <div class="hero">
-      <div class="card">
-        <h2>Projeto Arena SX</h2>
-        <p>A Arena SX transforma a captação em jogo: cada profissional começa com 500 XP, ganha pontos por resultado, perde por falhas operacionais e pode criar desafios quantas vezes quiser no dia.</p>
-        <div class="note"><b>Regra de ouro:</b> resultado bom gera XP. Falha operacional tira XP. Desafio pode ser criado o dia todo, individual ou por equipe.</div>
-      </div>
-      <div class="card">
-        <div class="title"><h2>🎯 Meta do jogo</h2><span class="small">Mentalidade de arena</span></div>
-        <div class="timeline">
-          <div class="step"><div class="dot">1</div><div><b>Produzir casais qualificados</b><br><span class="small">Volume com qualidade.</span></div></div>
-          <div class="step"><div class="dot">2</div><div><b>Converter em vendas</b><br><span class="small">Resultado real para operação.</span></div></div>
-          <div class="step"><div class="dot">3</div><div><b>Subir no ranking</b><br><span class="small">XP, premiação e reconhecimento.</span></div></div>
-        </div>
-      </div>
-    </div>
-    <div class="grid">
-      <div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Todos começam igual</div></div>
-      <div class="card kpi"><div class="label">Desafios no dia</div><div class="num">∞</div><div class="mini">Criar quantas vezes quiser</div></div>
-      <div class="card kpi"><div class="label">Meta diária base</div><div class="num">24</div><div class="mini">Casais da operação</div></div>
-      <div class="card kpi"><div class="label">Spiff diário</div><div class="num">R$100</div><div class="mini">Voucher ou PIX</div></div>
-    </div>
+    <div class="hero"><div class="card"><h2>Projeto Arena SX Online</h2><p>Agora os dados ficam no Supabase. Quando um profissional cria um desafio, todos que entrarem no link conseguem ver.</p><div class="note"><b>Regra de ouro:</b> todos começam com 500 XP. Resultado soma XP. Falha operacional perde XP.</div></div><div class="card"><div class="title"><h2>🎯 Como usar</h2></div><div class="note">1. Cada pessoa cria conta com e-mail e senha.<br>2. Cria desafio na aba Desafios.<br>3. Lança XP no Pulse Bank.<br>4. Ranking atualiza para todos.</div></div></div>
+    <div class="grid"><div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Todos começam igual</div></div><div class="card kpi"><div class="label">Desafios</div><div class="num" id="kDesafios">0</div><div class="mini">Online</div></div><div class="card kpi"><div class="label">Usuários</div><div class="num" id="kUsuarios">0</div><div class="mini">Cadastrados</div></div><div class="card kpi"><div class="label">Feed</div><div class="num" id="kFeed">0</div><div class="mini">Mensagens</div></div></div>
   </section>
 
-  <section id="desafios" class="section">
-    <div class="card">
-      <div class="title"><h2>⚔️ Arena de Desafios</h2><span class="small">Pode criar desafios ilimitados no dia</span></div>
-      <div class="form">
-        <input id="dCriador" placeholder="Quem criou">
-        <input id="dContra" placeholder="Contra quem/equipe">
-        <select id="dTipo"><option>Casais</option><option>Vendas</option><option>VGV</option><option>XP</option><option>Ponto de captação</option></select>
-        <input id="dMeta" placeholder="Meta do desafio">
-        <input id="dAposta" type="number" placeholder="XP apostado">
-        <button onclick="criarDesafio()">Criar desafio</button>
-      </div>
-      <div id="listaDesafios"></div>
-    </div>
-  </section>
+  <section id="desafios" class="section"><div class="card"><div class="title"><h2>⚔️ Arena de Desafios</h2><span class="small">Todos veem online</span></div><div class="form"><input id="dCriador" placeholder="Quem criou"><input id="dContra" placeholder="Contra quem/equipe"><select id="dTipo"><option>Casais</option><option>Vendas</option><option>VGV</option><option>XP</option><option>Ponto de captação</option></select><input id="dMeta" type="number" placeholder="Meta do desafio"><input id="dAposta" type="number" placeholder="XP apostado"><button onclick="criarDesafio()">Criar desafio</button></div><div id="listaDesafios"></div></div></section>
 
-  <section id="competicoes" class="section">
-    <div class="three">
-      <div class="card"><div class="title"><h2>⚔️ Duelo de Equipes</h2></div><p>Competição entre equipes para bater primeiro a meta definida pelo gestor.</p><span class="pill">15 casais primeiro</span><span class="pill">Prêmio por equipe</span><span class="pill">Ranking em tempo real</span></div>
-      <div class="card"><div class="title"><h2>🏆 Top do Dia</h2></div><p>Premiação diária para quem gerar mais resultado no dia.</p><span class="pill">Mais casais</span><span class="pill">Maior VGV</span><span class="pill">Mais vendas</span></div>
-      <div class="card"><div class="title"><h2>🔥 Desafio Relâmpago</h2></div><p>Campanhas curtas por horário ou ponto de captação.</p><span class="pill">Manhã</span><span class="pill">Tarde</span><span class="pill">Ponto específico</span></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="title"><h2>Modelo de competição</h2><span class="small">Pronto para usar</span></div>
-      <table><thead><tr><th>Competição</th><th>Objetivo</th><th>Vencedor</th><th>Prêmio sugerido</th></tr></thead><tbody>
-        <tr><td>Equipe 15 Casais</td><td>Primeira equipe a colocar 15 casais</td><td>Equipe completa</td><td>R$ 200 / voucher / almoço</td></tr>
-        <tr><td>Top Promotor Dia</td><td>Mais casais no dia</td><td>Individual</td><td>R$ 100 PIX ou voucher</td></tr>
-        <tr><td>Top VGV Dia</td><td>Maior VGV do dia</td><td>Individual</td><td>R$ 100 PIX ou voucher</td></tr>
-        <tr><td>Meta Semanal</td><td>Bater meta da semana</td><td>Equipe ou individual</td><td>XP extra + premiação</td></tr>
-      </tbody></table>
-    </div>
-  </section>
+  <section id="regras" class="section"><div class="two"><div class="card"><div class="title"><h2>✅ Ganhos de XP</h2></div><table><tbody><tr><td>Casal colocado</td><td class="ok">+50</td></tr><tr><td>Venda realizada</td><td class="ok">+300</td></tr><tr><td>Top 1 casais</td><td class="ok">+500</td></tr><tr><td>Meta individual</td><td class="ok">+1000</td></tr></tbody></table></div><div class="card"><div class="title"><h2>❌ Perdas de XP</h2></div><table><tbody><tr><td>Atraso</td><td class="bad">-50</td></tr><tr><td>Falta</td><td class="bad">-100</td></tr><tr><td>Casal sem perfil</td><td class="bad">-100</td></tr><tr><td>Indisciplina</td><td class="bad">-200</td></tr></tbody></table></div></div></section>
 
-  <section id="regras" class="section">
-    <div class="two">
-      <div class="card"><div class="title"><h2>✅ Ganhos de XP</h2></div><table><thead><tr><th>Ação positiva</th><th>XP</th></tr></thead><tbody>
-        <tr><td>Casal colocado</td><td class="ok">+50</td></tr><tr><td>Venda realizada</td><td class="ok">+300</td></tr><tr><td>Top 1 casais do dia</td><td class="ok">+500</td></tr><tr><td>Top 1 VGV do dia</td><td class="ok">+500</td></tr><tr><td>Meta individual batida</td><td class="ok">+1000</td></tr><tr><td>Meta da equipe batida</td><td class="ok">+700</td></tr>
-      </tbody></table></div>
-      <div class="card"><div class="title"><h2>❌ Perdas de XP</h2></div><table><thead><tr><th>Ação negativa</th><th>XP</th></tr></thead><tbody>
-        <tr><td>Atraso</td><td class="bad">-50</td></tr><tr><td>Falta sem justificativa</td><td class="bad">-100</td></tr><tr><td>Casal sem perfil</td><td class="bad">-100</td></tr><tr><td>Sem uniforme</td><td class="bad">-50</td></tr><tr><td>Abandono de ponto</td><td class="bad">-150</td></tr><tr><td>Indisciplina operacional</td><td class="bad">-200</td></tr>
-      </tbody></table></div>
-    </div>
-    <div class="card" style="margin-top:14px"><div class="title"><h2>📌 Regras principais</h2></div><div class="note">
-      1. Todo profissional começa com <b>500 XP</b>.<br>2. Desafios podem ser criados quantas vezes quiser no dia.<br>3. XP serve para ranking, reconhecimento e troca por prêmios.<br>4. O gestor pode aprovar, remover ou corrigir XP.<br>5. Casal exceção não conta para premiação, salvo autorização do gestor.<br>6. Falhas operacionais podem gerar perda de XP no mesmo dia.
-    </div></div>
-  </section>
-
-  <section id="banco" class="section">
-    <div class="card">
-      <div class="title"><h2>🏦 Pulse Bank</h2><span class="small">Salva no navegador usando localStorage</span></div>
-      <div class="form">
-        <input id="nome" placeholder="Profissional">
-        <select id="tipo"><option value="ganho">Depósito/Ganho</option><option value="perda">Débito/Perda</option></select>
-        <input id="xp" type="number" placeholder="XP">
-        <input id="motivo" placeholder="Motivo">
-        <button onclick="addXP()">Lançar XP</button>
-      </div>
-      <div class="form">
-        <input id="transDe" placeholder="Transferir de">
-        <input id="transPara" placeholder="Para quem">
-        <input id="transXP" type="number" placeholder="XP">
-        <input id="transMotivo" placeholder="Motivo">
-        <button class="success" onclick="transferirXP()">Transferir XP</button>
-      </div>
-      <div id="bankResumo" class="grid" style="margin-top:14px"></div>
-      <div id="bankTable" style="margin-top:14px"></div>
-    </div>
-  </section>
+  <section id="banco" class="section"><div class="card"><div class="title"><h2>🏦 Pulse Bank Online</h2><span class="small">Salvo no Supabase</span></div><div class="form"><input id="nome" placeholder="Profissional"><select id="tipo"><option value="ganho">Depósito/Ganho</option><option value="perda">Débito/Perda</option></select><input id="xp" type="number" placeholder="XP"><input id="motivo" placeholder="Motivo"><button onclick="addXP()">Lançar XP</button></div><div class="form"><input id="transDe" placeholder="Transferir de"><input id="transPara" placeholder="Para quem"><input id="transXP" type="number" placeholder="XP"><input id="transMotivo" placeholder="Motivo"><button class="success" onclick="transferirXP()">Transferir XP</button></div><div id="bankResumo" class="grid" style="margin-top:14px"></div><div id="bankTable" style="margin-top:14px"></div></div></section>
 
   <section id="ranking" class="section"><div class="card"><div class="title"><h2>🏅 Ranking Arena</h2><span class="small">Ordenado pelo saldo XP</span></div><div id="rankingXP"></div></div></section>
 
-  <section id="perfil" class="section">
-    <div class="card">
-      <div class="title"><h2>👤 Perfil individual</h2><span class="small">Busca pelo nome</span></div>
-      <div class="form"><input id="perfilBusca" placeholder="Digite o nome do profissional"><button onclick="buscarPerfil()">Buscar Perfil</button></div>
-      <div id="perfilResultado"></div>
-    </div>
-  </section>
+  <section id="perfil" class="section"><div class="card"><div class="title"><h2>👤 Perfil individual</h2><span class="small">Busca pelo nome</span></div><div class="form"><input id="perfilBusca" placeholder="Digite o nome"><button onclick="buscarPerfil()">Buscar Perfil</button></div><div id="perfilResultado"></div></div></section>
 
   <section id="equipes" class="section"><div class="two"><div class="card"><div class="title"><h2>👥 Equipe Raphael Bueno</h2></div><div class="member-tags" id="eqRaphael"></div></div><div class="card"><div class="title"><h2>👥 Equipe Francisco</h2></div><div class="member-tags" id="eqFrancisco"></div></div></div></section>
 
-  <section id="feed" class="section"><div class="card"><div class="title"><h2>💬 Feed da Arena</h2><span class="small">Avisos, provocações saudáveis e comemorações</span></div><div class="form"><input id="feedNome" placeholder="Nome"><input id="feedMsg" placeholder="Mensagem"><button onclick="postFeed()">Publicar</button></div><div id="feedList" class="list" style="margin-top:14px"></div></div></section>
+  <section id="feed" class="section"><div class="card"><div class="title"><h2>💬 Feed da Arena</h2><span class="small">Online</span></div><div class="form"><input id="feedNome" placeholder="Nome"><input id="feedMsg" placeholder="Mensagem"><button onclick="postFeed()">Publicar</button></div><div id="feedList" class="list" style="margin-top:14px"></div></div></section>
 
-  <section id="hall" class="section">
-    <div class="card">
-      <div class="title"><h2>🏆 Hall da Fama</h2><span class="small">Reconhecimento da Arena</span></div>
-      <div class="grid">
-        <div class="card kpi"><div class="label">Campeão XP</div><div class="num" id="hallXP">-</div><div class="mini">Maior saldo atual</div></div>
-        <div class="card kpi"><div class="label">Recorde Casais</div><div class="num">A definir</div><div class="mini">Atualize pelo gestor</div></div>
-        <div class="card kpi"><div class="label">Recorde VGV</div><div class="num">A definir</div><div class="mini">Atualize pelo gestor</div></div>
-        <div class="card kpi"><div class="label">Campeão Equipe</div><div class="num">A definir</div><div class="mini">Mensal</div></div>
-      </div>
-    </div>
-  </section>
+  <section id="hall" class="section"><div class="card"><div class="title"><h2>🏆 Hall da Fama</h2></div><div class="grid"><div class="card kpi"><div class="label">Campeão XP</div><div class="num" id="hallXP">-</div><div class="mini">Maior saldo atual</div></div><div class="card kpi"><div class="label">Recorde Casais</div><div class="num">A definir</div></div><div class="card kpi"><div class="label">Recorde VGV</div><div class="num">A definir</div></div><div class="card kpi"><div class="label">Campeão Equipe</div><div class="num">A definir</div></div></div></div></section>
 
-  <section id="premios" class="section"><div class="card"><div class="title"><h2>🎁 Loja de Prêmios XP</h2></div><table><thead><tr><th>Prêmio</th><th>Custo XP</th><th>Observação</th></tr></thead><tbody><tr><td>Voucher R$ 50</td><td>1000 XP</td><td>Mediante aprovação</td></tr><tr><td>Voucher R$ 100</td><td>1800 XP</td><td>Mediante aprovação</td></tr><tr><td>Folga programada</td><td>3000 XP</td><td>Combinada com gestor</td></tr><tr><td>Almoço especial</td><td>2500 XP</td><td>Individual ou equipe</td></tr><tr><td>Kit reconhecimento</td><td>1500 XP</td><td>Camisa/brinde interno</td></tr></tbody></table></div></section>
+  <section id="premios" class="section"><div class="card"><div class="title"><h2>🎁 Loja de Prêmios XP</h2></div><table><thead><tr><th>Prêmio</th><th>Custo XP</th><th>Observação</th></tr></thead><tbody><tr><td>Voucher R$ 50</td><td>1000 XP</td><td>Aprovação gestor</td></tr><tr><td>Voucher R$ 100</td><td>1800 XP</td><td>Aprovação gestor</td></tr><tr><td>Folga programada</td><td>3000 XP</td><td>Combinada</td></tr><tr><td>Almoço especial</td><td>2500 XP</td><td>Individual ou equipe</td></tr></tbody></table></div></section>
 
-  <section id="admin" class="section">
-    <div class="card"><div class="title"><h2>⚙️ Painel do Gestor</h2></div>
-      <div class="note"><b>Próxima etapa profissional:</b> conectar no Supabase para login, perfis individuais, feed real, banco de XP real e permissões por função. Hoje esta versão já roda no GitHub Pages e salva dados no navegador.</div>
-      <div class="three" style="margin-top:14px">
-        <button class="danger" onclick="resetarTudo()">Resetar dados do navegador</button>
-        <button onclick="exportarDados()">Exportar backup JSON</button>
-        <button class="goldbtn" onclick="alert('Para versão com login, a próxima etapa é Supabase.')">Versão Supabase</button>
-      </div>
-      <pre id="backup" style="white-space:pre-wrap;color:#98a2b3;margin-top:14px"></pre>
-    </div>
-  </section>
+  <section id="admin" class="section"><div class="card"><div class="title"><h2>⚙️ Painel do Gestor</h2></div><div class="note">Admin online. Para limpar dados, apague pelo Supabase Table Editor. Para segurança profissional, depois ative RLS e políticas por usuário.</div><button onclick="carregarTudo()">Atualizar tudo</button></div></section>
 
-  <div class="footer">Arena SX • Pulse Bank • Competições • XP • Versão HTML estática profissional</div>
+  <div class="footer">Arena SX • Supabase Online • Pulse Bank • Desafios • XP</div>
 </main>
+</div>
 
 <script>
+const SUPABASE_URL = "https://rpodkecgklapawauvnan.supabase.co";
+const SUPABASE_KEY = "COLE_SUA_PUBLISHABLE_KEY_AQUI";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const equipeRaphael=['Adriano','Ana Caroline','Daniela','Ivanilson','Jessica','Josyene','Larissa Ribeiro','Mateus Rosa','Mateus Esley','Pedro','Rebeca','Suenne','Marcio Alfaia','José Ademir'];
 const equipeFrancisco=['Ricardo','Renan','Mateus Domingos','Jonatas','João Francisco','Felipe Sub Líder','André','Alexandre'];
+let currentUser=null, currentProfile=null, profiles=[], lancamentos=[], desafios=[], feed=[];
 
-let lancamentos = JSON.parse(localStorage.getItem('arena_lancamentos')||'[]');
-let desafios = JSON.parse(localStorage.getItem('arena_desafios')||'[]');
-let feed = JSON.parse(localStorage.getItem('arena_feed')||'[]');
+function msg(t){authMsg.textContent=t||''}
+function nomeAtual(){return currentProfile?.nome || currentUser?.email || 'Usuário'}
 
-if(feed.length===0){
-  feed=[{nome:'Gestão',msg:'Bem-vindos à Arena SX. Aqui é performance, disciplina e resultado.'},{nome:'Arena',msg:'Quem bate meta sobe no ranking. Quem falha, perde XP.'}];
-  salvar();
+async function signup(){
+  const nome=authNome.value.trim(), equipe=authEquipe.value.trim(), email=authEmail.value.trim(), senha=authSenha.value;
+  if(!nome||!email||!senha) return msg('Preencha nome, e-mail e senha.');
+  const {data,error}=await sb.auth.signUp({email,password:senha});
+  if(error) return msg(error.message);
+  currentUser=data.user;
+  await upsertProfile(nome,email,equipe);
+  await iniciar();
 }
-function salvar(){
-  localStorage.setItem('arena_lancamentos',JSON.stringify(lancamentos));
-  localStorage.setItem('arena_desafios',JSON.stringify(desafios));
-  localStorage.setItem('arena_feed',JSON.stringify(feed));
+
+async function login(){
+  const email=authEmail.value.trim(), senha=authSenha.value;
+  if(!email||!senha) return msg('Preencha e-mail e senha.');
+  const {data,error}=await sb.auth.signInWithPassword({email,password:senha});
+  if(error) return msg(error.message);
+  currentUser=data.user;
+  await iniciar();
 }
+
+async function logout(){ await sb.auth.signOut(); location.reload(); }
+
+async function upsertProfile(nome,email,equipe){
+  await sb.from('profiles').upsert({email,nome,role: email==='raphaelbueno.captacao@gmail.com'?'admin':'usuario',xp:500,equipe},{onConflict:'email'});
+}
+
+async function garantirProfile(){
+  if(!currentUser) return;
+  const email=currentUser.email;
+  let {data}=await sb.from('profiles').select('*').eq('email',email).maybeSingle();
+  if(!data){
+    const nome=email.split('@')[0];
+    await upsertProfile(nome,email,'');
+    data={email,nome,role:'usuario',xp:500,equipe:''};
+  }
+  currentProfile=data;
+  usuarioLogado.textContent=`${currentProfile.nome} • ${currentProfile.role} • 500 XP inicial`;
+}
+
+async function iniciar(){
+  const {data:{session}}=await sb.auth.getSession();
+  currentUser=session?.user || currentUser;
+  if(!currentUser){authScreen.classList.remove('hidden');app.classList.add('hidden');return}
+  await garantirProfile();
+  authScreen.classList.add('hidden');app.classList.remove('hidden');
+  dCriador.value=nomeAtual(); feedNome.value=nomeAtual(); nome.value=nomeAtual(); perfilBusca.value=nomeAtual();
+  await carregarTudo();
+  assinarRealtime();
+}
+
+async function carregarTudo(){
+  const [p,l,d,f]=await Promise.all([
+    sb.from('profiles').select('*').order('nome'),
+    sb.from('xp_lancamentos').select('*').order('created_at',{ascending:false}),
+    sb.from('desafios').select('*').order('created_at',{ascending:false}),
+    sb.from('feed').select('*').order('created_at',{ascending:false})
+  ]);
+  if(p.error||l.error||d.error||f.error){ alert('Erro ao carregar. Confira se colou a Publishable Key e se as tabelas estão públicas.'); console.log(p.error,l.error,d.error,f.error); return; }
+  profiles=p.data||[]; lancamentos=l.data||[]; desafios=d.data||[]; feed=f.data||[];
+  renderAll();
+}
+
+function assinarRealtime(){
+  sb.channel('arena-sx-realtime')
+    .on('postgres_changes',{event:'*',schema:'public',table:'desafios'},carregarTudo)
+    .on('postgres_changes',{event:'*',schema:'public',table:'xp_lancamentos'},carregarTudo)
+    .on('postgres_changes',{event:'*',schema:'public',table:'feed'},carregarTudo)
+    .on('postgres_changes',{event:'*',schema:'public',table:'profiles'},carregarTudo)
+    .subscribe();
+}
+
 function openTab(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderAll()}
 function moeda(n){return Number(n||0).toLocaleString('pt-BR')+' XP'}
-function todosNomes(){return [...new Set([...equipeRaphael,...equipeFrancisco,...lancamentos.map(x=>x.nome),...lancamentos.map(x=>x.para)].filter(Boolean))]}
-function saldos(){let base={};todosNomes().forEach(n=>base[n]=500);lancamentos.forEach(l=>{if(l.nome)base[l.nome]=(base[l.nome]??500)+Number(l.xp||0); if(l.para)base[l.para]=(base[l.para]??500)+Number(l.xpPara||0)});return base}
-function addXP(){let nome=document.getElementById('nome').value.trim();let tipo=document.getElementById('tipo').value;let xp=Number(document.getElementById('xp').value||0);let motivo=document.getElementById('motivo').value.trim();if(!nome||!xp)return alert('Preencha nome e XP');lancamentos.push({data:new Date().toLocaleString('pt-BR'),nome,tipo,xp:tipo==='perda'?-Math.abs(xp):Math.abs(xp),motivo:motivo||'Lançamento manual'});document.getElementById('nome').value='';document.getElementById('xp').value='';document.getElementById('motivo').value='';salvar();renderBank()}
-function transferirXP(){let de=document.getElementById('transDe').value.trim();let para=document.getElementById('transPara').value.trim();let xp=Number(document.getElementById('transXP').value||0);let motivo=document.getElementById('transMotivo').value.trim()||'Transferência XP';if(!de||!para||!xp)return alert('Preencha de, para e XP');lancamentos.push({data:new Date().toLocaleString('pt-BR'),nome:de,para:para,tipo:'transferencia',xp:-Math.abs(xp),xpPara:Math.abs(xp),motivo});document.getElementById('transDe').value='';document.getElementById('transPara').value='';document.getElementById('transXP').value='';document.getElementById('transMotivo').value='';salvar();renderBank()}
-function criarDesafio(){let criador=dCriador.value.trim(), contra=dContra.value.trim(), tipo=dTipo.value, meta=dMeta.value.trim(), aposta=Number(dAposta.value||0); if(!criador||!contra||!meta)return alert('Preencha criador, contra e meta'); desafios.unshift({id:Date.now(),data:new Date().toLocaleString('pt-BR'),criador,contra,tipo,meta,aposta,status:'Aberto',vencedor:''}); dCriador.value='';dContra.value='';dMeta.value='';dAposta.value='';salvar();renderDesafios()}
-function encerrarDesafio(id,vencedor){let d=desafios.find(x=>x.id===id); if(!d)return; d.status='Encerrado'; d.vencedor=vencedor; if(d.aposta>0){lancamentos.push({data:new Date().toLocaleString('pt-BR'),nome:vencedor,tipo:'ganho',xp:Math.abs(d.aposta),motivo:'Venceu desafio: '+d.tipo});} salvar();renderAll()}
-function renderDesafios(){listaDesafios.innerHTML=desafios.length?desafios.map(d=>`<div class="challenge"><div class="challenge-head"><b>⚔️ ${d.criador} X ${d.contra}</b><span class="status">${d.status}</span></div><div class="small">${d.data}</div><p><b>Tipo:</b> ${d.tipo} • <b>Meta:</b> ${d.meta} • <b>Aposta:</b> ${moeda(d.aposta)}</p>${d.status==='Aberto'?`<button onclick="encerrarDesafio(${d.id},'${d.criador.replace(/'/g,"")}')">Venceu ${d.criador}</button> <button class="success" onclick="encerrarDesafio(${d.id},'${d.contra.replace(/'/g,"")}')">Venceu ${d.contra}</button>`:`<span class="pill">🏆 Vencedor: ${d.vencedor}</span>`}</div>`).join(''):'<div class="note">Nenhum desafio criado ainda.</div>'}
-function renderBank(){let s=saldos();let total=Object.values(s).reduce((a,b)=>a+b,0);let max=Math.max(...Object.values(s));bankResumo.innerHTML=`<div class="card kpi"><div class="label">Profissionais</div><div class="num">${Object.keys(s).length}</div><div class="mini">Com saldo XP</div></div><div class="card kpi"><div class="label">XP total</div><div class="num">${moeda(total)}</div><div class="mini">Somado</div></div><div class="card kpi"><div class="label">Maior saldo</div><div class="num">${moeda(max)}</div><div class="mini">Top da Arena</div></div><div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Padrão</div></div>`;
-let rows=lancamentos.slice().reverse().map(l=>`<tr><td>${l.data||'-'}</td><td>${l.nome}${l.para?' → '+l.para:''}</td><td>${l.tipo}</td><td class="${(l.xp||0)>=0?'ok':'bad'}">${(l.xp||0)>0?'+':''}${l.xp||0}${l.xpPara?' / +'+l.xpPara:''}</td><td>${l.motivo}</td></tr>`).join('');bankTable.innerHTML=`<table><thead><tr><th>Data</th><th>Nome</th><th>Tipo</th><th>XP</th><th>Motivo</th></tr></thead><tbody>${rows}</tbody></table>`;renderRanking()}
-function renderRanking(){let s=saldos();let rows=Object.entries(s).sort((a,b)=>b[1]-a[1]).map(([n,x],i)=>`<tr><td>${i+1}º</td><td>${n}</td><td class="gold">${moeda(x)}</td><td>${x>=1500?'🔥 Lenda':x>=1000?'⚡ Elite':x>=700?'🟢 Forte':'🟡 Em evolução'}</td></tr>`).join('');rankingXP.innerHTML=`<table><thead><tr><th>Rank</th><th>Profissional</th><th>Saldo XP</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;let top=Object.entries(s).sort((a,b)=>b[1]-a[1])[0];hallXP.innerText=top?top[0]:'-'}
-function buscarPerfil(){let nome=perfilBusca.value.trim();if(!nome)return;let s=saldos();let saldo=s[nome]??500;let hist=lancamentos.filter(l=>l.nome===nome||l.para===nome);perfilResultado.innerHTML=`<div class="grid"><div class="card kpi"><div class="label">Profissional</div><div class="num">${nome}</div><div class="mini">Perfil Arena</div></div><div class="card kpi"><div class="label">Saldo XP</div><div class="num">${moeda(saldo)}</div><div class="mini">Atual</div></div><div class="card kpi"><div class="label">Lançamentos</div><div class="num">${hist.length}</div><div class="mini">Histórico</div></div><div class="card kpi"><div class="label">Status</div><div class="num">${saldo>=1000?'Elite':'Evolução'}</div><div class="mini">Arena SX</div></div></div><div style="margin-top:14px">${hist.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>XP</th><th>Motivo</th></tr></thead><tbody>${hist.map(l=>`<tr><td>${l.data||'-'}</td><td>${l.tipo}</td><td>${l.xp||l.xpPara}</td><td>${l.motivo}</td></tr>`).join('')}</tbody></table>`:'<div class="note">Sem lançamentos ainda.</div>'}</div>`}
+function dataBR(x){return x?new Date(x).toLocaleString('pt-BR'):'-'}
+
+function todosNomes(){return [...new Set([...equipeRaphael,...equipeFrancisco,...profiles.map(x=>x.nome),...lancamentos.map(x=>x.usuario)].filter(Boolean))]}
+function saldos(){let base={};todosNomes().forEach(n=>base[n]=500);lancamentos.forEach(l=>{if(l.usuario)base[l.usuario]=(base[l.usuario]??500)+Number(l.xp||0)});return base}
+
+async function addXP(){
+  let usuario=nome.value.trim(), tipo=tipo.value, valor=Number(xp.value||0), mot=motivo.value.trim();
+  if(!usuario||!valor)return alert('Preencha nome e XP');
+  const xpFinal=tipo==='perda'?-Math.abs(valor):Math.abs(valor);
+  const {error}=await sb.from('xp_lancamentos').insert({usuario,tipo,xp:xpFinal,motivo:mot||'Lançamento manual'});
+  if(error)return alert(error.message);
+  nome.value=''; xp.value=''; motivo.value=''; await carregarTudo();
+}
+
+async function transferirXP(){
+  let de=transDe.value.trim(), para=transPara.value.trim(), valor=Number(transXP.value||0), mot=transMotivo.value.trim()||'Transferência XP';
+  if(!de||!para||!valor)return alert('Preencha de, para e XP');
+  const rows=[{usuario:de,tipo:'transferencia_saida',xp:-Math.abs(valor),motivo:mot+' para '+para},{usuario:para,tipo:'transferencia_entrada',xp:Math.abs(valor),motivo:mot+' de '+de}];
+  const {error}=await sb.from('xp_lancamentos').insert(rows);
+  if(error)return alert(error.message);
+  transDe.value='';transPara.value='';transXP.value='';transMotivo.value=''; await carregarTudo();
+}
+
+async function criarDesafio(){
+  let criador=dCriador.value.trim()||nomeAtual(), adversario=dContra.value.trim(), tipoV=dTipo.value, meta=Number(dMeta.value||0), aposta=Number(dAposta.value||0);
+  if(!criador||!adversario||!meta)return alert('Preencha criador, adversário e meta');
+  const {error}=await sb.from('desafios').insert({criador,adversario,tipo:tipoV,meta,aposta_xp:aposta,status:'aberto'});
+  if(error)return alert(error.message);
+  dContra.value='';dMeta.value='';dAposta.value=''; await carregarTudo();
+}
+
+async function encerrarDesafio(id,vencedor,tipoD,aposta){
+  const {error}=await sb.from('desafios').update({status:'encerrado',vencedor}).eq('id',id);
+  if(error)return alert(error.message);
+  if(Number(aposta)>0){
+    await sb.from('xp_lancamentos').insert({usuario:vencedor,tipo:'ganho',xp:Math.abs(Number(aposta)),motivo:'Venceu desafio: '+tipoD});
+  }
+  await carregarTudo();
+}
+
+function renderDesafios(){
+  listaDesafios.innerHTML=desafios.length?desafios.map(d=>`<div class="challenge"><div class="challenge-head"><b>⚔️ ${d.criador} X ${d.adversario}</b><span class="status">${d.status}</span></div><div class="small">${dataBR(d.created_at)}</div><p><b>Tipo:</b> ${d.tipo} • <b>Meta:</b> ${d.meta} • <b>Aposta:</b> ${moeda(d.aposta_xp)}</p>${d.status==='aberto'?`<button onclick="encerrarDesafio('${d.id}','${String(d.criador).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Venceu ${d.criador}</button> <button class="success" onclick="encerrarDesafio('${d.id}','${String(d.adversario).replace(/'/g,"")}','${d.tipo}',${d.aposta_xp||0})">Venceu ${d.adversario}</button>`:`<span class="pill">🏆 Vencedor: ${d.vencedor||'-'}</span>`}</div>`).join(''):'<div class="note">Nenhum desafio criado ainda.</div>'
+}
+
+function renderBank(){
+  let s=saldos(), vals=Object.values(s), total=vals.reduce((a,b)=>a+b,0), max=vals.length?Math.max(...vals):0;
+  bankResumo.innerHTML=`<div class="card kpi"><div class="label">Profissionais</div><div class="num">${Object.keys(s).length}</div><div class="mini">Com saldo XP</div></div><div class="card kpi"><div class="label">XP total</div><div class="num">${moeda(total)}</div><div class="mini">Somado</div></div><div class="card kpi"><div class="label">Maior saldo</div><div class="num">${moeda(max)}</div><div class="mini">Top da Arena</div></div><div class="card kpi"><div class="label">XP inicial</div><div class="num">500</div><div class="mini">Padrão</div></div>`;
+  let rows=lancamentos.map(l=>`<tr><td>${dataBR(l.created_at)}</td><td>${l.usuario}</td><td>${l.tipo}</td><td class="${Number(l.xp)>=0?'ok':'bad'}">${Number(l.xp)>0?'+':''}${l.xp}</td><td>${l.motivo||''}</td></tr>`).join('');
+  bankTable.innerHTML=`<table><thead><tr><th>Data</th><th>Nome</th><th>Tipo</th><th>XP</th><th>Motivo</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderRanking(){
+  let s=saldos();
+  let rows=Object.entries(s).sort((a,b)=>b[1]-a[1]).map(([n,x],i)=>`<tr><td>${i+1}º</td><td>${n}</td><td class="gold">${moeda(x)}</td><td>${x>=1500?'🔥 Lenda':x>=1000?'⚡ Elite':x>=700?'🟢 Forte':'🟡 Em evolução'}</td></tr>`).join('');
+  rankingXP.innerHTML=`<table><thead><tr><th>Rank</th><th>Profissional</th><th>Saldo XP</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  let top=Object.entries(s).sort((a,b)=>b[1]-a[1])[0]; hallXP.innerText=top?top[0]:'-';
+}
+
+function buscarPerfil(){
+  let n=perfilBusca.value.trim(); if(!n)return;
+  let s=saldos(), saldo=s[n]??500, hist=lancamentos.filter(l=>l.usuario===n);
+  perfilResultado.innerHTML=`<div class="grid"><div class="card kpi"><div class="label">Profissional</div><div class="num">${n}</div></div><div class="card kpi"><div class="label">Saldo XP</div><div class="num">${moeda(saldo)}</div></div><div class="card kpi"><div class="label">Lançamentos</div><div class="num">${hist.length}</div></div><div class="card kpi"><div class="label">Status</div><div class="num">${saldo>=1000?'Elite':'Evolução'}</div></div></div><div style="margin-top:14px">${hist.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>XP</th><th>Motivo</th></tr></thead><tbody>${hist.map(l=>`<tr><td>${dataBR(l.created_at)}</td><td>${l.tipo}</td><td>${l.xp}</td><td>${l.motivo||''}</td></tr>`).join('')}</tbody></table>`:'<div class="note">Sem lançamentos ainda.</div>'}</div>`;
+}
+
 function renderEquipes(){eqRaphael.innerHTML=equipeRaphael.map(x=>`<span>${x}</span>`).join('');eqFrancisco.innerHTML=equipeFrancisco.map(x=>`<span>${x}</span>`).join('')}
-function postFeed(){let nome=feedNome.value.trim()||'Equipe';let msg=feedMsg.value.trim();if(!msg)return;feed.unshift({nome,msg,data:new Date().toLocaleString('pt-BR')});feedMsg.value='';salvar();renderFeed()}
-function renderFeed(){feedList.innerHTML=feed.map(p=>`<div class="feed-post"><b>${p.nome}</b><br>${p.msg}<br><span class="small">${p.data||'Agora'} • Arena SX</span></div>`).join('')}
-function exportarDados(){backup.textContent=JSON.stringify({lancamentos,desafios,feed},null,2)}
-function resetarTudo(){if(confirm('Tem certeza que deseja apagar os dados salvos neste navegador?')){localStorage.removeItem('arena_lancamentos');localStorage.removeItem('arena_desafios');localStorage.removeItem('arena_feed');location.reload()}}
-function renderAll(){renderDesafios();renderBank();renderRanking();renderEquipes();renderFeed()}renderAll();
+
+async function postFeed(){
+  let usuario=feedNome.value.trim()||nomeAtual(), mensagem=feedMsg.value.trim(); if(!mensagem)return;
+  const {error}=await sb.from('feed').insert({usuario,mensagem});
+  if(error)return alert(error.message);
+  feedMsg.value=''; await carregarTudo();
+}
+function renderFeed(){feedList.innerHTML=feed.length?feed.map(p=>`<div class="feed-post"><b>${p.usuario}</b><br>${p.mensagem}<br><span class="small">${dataBR(p.created_at)} • Arena SX</span></div>`).join(''):'<div class="note">Nenhuma mensagem ainda.</div>'}
+
+function renderAll(){kDesafios.textContent=desafios.length;kUsuarios.textContent=profiles.length;kFeed.textContent=feed.length;renderDesafios();renderBank();renderRanking();renderEquipes();renderFeed()}
+iniciar();
 </script>
 </body>
 </html>
