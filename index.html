@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Arena SX Online | Supabase</title>
+  <meta name="theme-color" content="#05060a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Arena SX" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
@@ -536,7 +544,7 @@ async function criarDesafio(){
   dContra.value='';dMeta.value='';dAposta.value=''; await carregarTudo();
 }
 
-async async function encerrarDesafio(id,vencedor,tipoD,aposta){
+async function encerrarDesafio(id,vencedor,tipoD,aposta){
   if(!isAdmin()) return alert('Somente o CEO/Admin pode confirmar o vencedor do desafio.');
   const ok = confirm('Confirmar vencedor: ' + vencedor + '?');
   if(!ok) return;
@@ -648,5 +656,6 @@ function renderAdminProfissionais(){
 function renderAll(){kDesafios.textContent=desafios.length;kUsuarios.textContent=profiles.length;kFeed.textContent=feed.length;renderDesafios();renderBank();renderRanking();renderEquipes();renderFeed();renderAdminProfissionais()}
 iniciar();
 </script>
+  <script src="./pwa-register.js" defer></script>
 </body>
 </html>
