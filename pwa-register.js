@@ -4,8 +4,11 @@
 
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      registration.update().catch(() => {});
+      const registration = await navigator.serviceWorker.register('./sw.js', {
+        scope: './',
+        updateViaCache: 'none'
+      });
+      await registration.update().catch(() => {});
     } catch (error) {
       console.warn('[Arena SX] Service worker não registrado:', error);
     }
