@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arena-sx-v2';
+const CACHE_NAME = 'arena-sx-v3-safe-shell';
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -8,11 +8,36 @@ const APP_SHELL = new Set([
   './icons/icon-512-maskable.svg'
 ]);
 const PRIVATE_PATH = /\/(api|auth|login|logout|admin|session|sessions|token|tokens|account|profile|me|supabase)(\/|\?|$)/i;
+const SENSITIVE_QUERY_KEYS = new Set([
+  'token',
+  'access_token',
+  'refresh_token',
+  'password',
+  'secret',
+  'session',
+  'auth',
+  'authorization',
+  'api_key',
+  'apikey',
+  'code',
+  'credential',
+  'credentials'
+]);
+
+function hasSensitiveQuery(url) {
+  for (const key of url.searchParams.keys()) {
+    if (SENSITIVE_QUERY_KEYS.has(key.toLowerCase())) return true;
+  }
+  return false;
+}
 
 function isSafeRequest(request) {
-  if (request.method !== 'GET' || request.headers.has('authorization')) return false;
+  if (request.method !== 'GET' || request.headers.has('authorization') || request.headers.has('cookie')) return false;
   const url = new URL(request.url);
-  return url.origin === self.location.origin && !PRIVATE_PATH.test(url.pathname) && !url.origin.includes('supabase.co');
+  return url.origin === self.location.origin &&
+    !PRIVATE_PATH.test(url.pathname) &&
+    !url.origin.includes('supabase.co') &&
+    !hasSensitiveQuery(url);
 }
 
 self.addEventListener('install', event => {
@@ -38,9 +63,11 @@ self.addEventListener('fetch', event => {
   }
 
   const url = new URL(request.url);
+  if (url.search) return;
+
   const scopePath = new URL(self.registration.scope).pathname;
   const relative = './' + url.pathname.slice(scopePath.length);
   if (!APP_SHELL.has(relative)) return;
 
-  event.respondWith(caches.match(request).then(cached => cached || fetch(request)));
+  event.respondWith(caches.match(request).then(cached => cached || fetch(request, { cache: 'no-store' })));
 });
