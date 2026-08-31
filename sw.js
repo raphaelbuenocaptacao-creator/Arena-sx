@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arena-sx-v3-safe-shell';
+const CACHE_NAME = 'arena-sx-v4-safe-shell';
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -13,6 +13,7 @@ const SENSITIVE_QUERY_KEYS = new Set([
   'access_token',
   'refresh_token',
   'password',
+  'passwd',
   'secret',
   'session',
   'auth',
