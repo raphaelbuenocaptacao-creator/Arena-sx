@@ -1,4 +1,5 @@
-const CACHE_NAME = 'arena-sx-v4-safe-shell';
+const CACHE_PREFIX = 'arena-sx-';
+const CACHE_NAME = `${CACHE_PREFIX}v5-safe-shell`;
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -9,20 +10,7 @@ const APP_SHELL = new Set([
 ]);
 const PRIVATE_PATH = /\/(api|auth|login|logout|admin|session|sessions|token|tokens|account|profile|me|supabase)(\/|\?|$)/i;
 const SENSITIVE_QUERY_KEYS = new Set([
-  'token',
-  'access_token',
-  'refresh_token',
-  'password',
-  'passwd',
-  'secret',
-  'session',
-  'auth',
-  'authorization',
-  'api_key',
-  'apikey',
-  'code',
-  'credential',
-  'credentials'
+  'token','access_token','refresh_token','password','passwd','secret','session','auth','authorization','api_key','apikey','code','credential','credentials'
 ]);
 
 function hasSensitiveQuery(url) {
@@ -41,15 +29,33 @@ function isSafeRequest(request) {
     !hasSensitiveQuery(url);
 }
 
+function isCacheableResponse(response) {
+  if (!response || !response.ok || response.status === 206 || response.type === 'opaque') return false;
+  const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
+  if (cacheControl.includes('private') || cacheControl.includes('no-store')) return false;
+  if (response.headers.has('set-cookie')) return false;
+  return true;
+}
+
+async function precacheShell() {
+  const cache = await caches.open(CACHE_NAME);
+  await Promise.all([...APP_SHELL].map(async path => {
+    try {
+      const response = await fetch(path, { credentials: 'omit', cache: 'no-store' });
+      if (isCacheableResponse(response)) await cache.put(path, response.clone());
+    } catch (_) {}
+  }));
+}
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll([...APP_SHELL])));
+  event.waitUntil(precacheShell());
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -59,7 +65,11 @@ self.addEventListener('fetch', event => {
   if (!isSafeRequest(request)) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request, { cache: 'no-store' }).catch(() => caches.match('./index.html')));
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then(response => response)
+        .catch(() => caches.open(CACHE_NAME).then(cache => cache.match('./index.html')))
+    );
     return;
   }
 
@@ -70,5 +80,17 @@ self.addEventListener('fetch', event => {
   const relative = './' + url.pathname.slice(scopePath.length);
   if (!APP_SHELL.has(relative)) return;
 
-  event.respondWith(caches.match(request).then(cached => cached || fetch(request, { cache: 'no-store' })));
+  event.respondWith(
+    caches.open(CACHE_NAME).then(async cache => {
+      const cached = await cache.match(relative);
+      if (cached) return cached;
+      try {
+        const response = await fetch(request, { credentials: 'omit', cache: 'no-store' });
+        if (isCacheableResponse(response)) await cache.put(relative, response.clone());
+        return response;
+      } catch (_) {
+        return cached;
+      }
+    })
+  );
 });
