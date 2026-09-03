@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'arena-sx-';
-const CACHE_NAME = `${CACHE_PREFIX}v5-safe-shell`;
+const CACHE_NAME = `${CACHE_PREFIX}v6-safe-shell`;
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -21,7 +21,13 @@ function hasSensitiveQuery(url) {
 }
 
 function isSafeRequest(request) {
-  if (request.method !== 'GET' || request.headers.has('authorization') || request.headers.has('cookie')) return false;
+  if (
+    request.method !== 'GET' ||
+    request.headers.has('authorization') ||
+    request.headers.has('cookie') ||
+    request.headers.has('range') ||
+    request.headers.has('if-range')
+  ) return false;
   const url = new URL(request.url);
   return url.origin === self.location.origin &&
     !PRIVATE_PATH.test(url.pathname) &&
@@ -30,10 +36,10 @@ function isSafeRequest(request) {
 }
 
 function isCacheableResponse(response) {
-  if (!response || !response.ok || response.status === 206 || response.type === 'opaque') return false;
+  if (!response || !response.ok || response.status === 206 || response.type === 'opaque' || response.redirected) return false;
   const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
   if (cacheControl.includes('private') || cacheControl.includes('no-store')) return false;
-  if (response.headers.has('set-cookie')) return false;
+  if (response.headers.has('set-cookie') || response.headers.has('content-range')) return false;
   return true;
 }
 
@@ -41,7 +47,7 @@ async function precacheShell() {
   const cache = await caches.open(CACHE_NAME);
   await Promise.all([...APP_SHELL].map(async path => {
     try {
-      const response = await fetch(path, { credentials: 'omit', cache: 'no-store' });
+      const response = await fetch(path, { credentials: 'omit', cache: 'no-store', redirect: 'error' });
       if (isCacheableResponse(response)) await cache.put(path, response.clone());
     } catch (_) {}
   }));
@@ -66,7 +72,7 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request, { cache: 'no-store' })
+      fetch(request, { cache: 'no-store', redirect: 'error' })
         .then(response => response)
         .catch(() => caches.open(CACHE_NAME).then(cache => cache.match('./index.html')))
     );
@@ -85,7 +91,7 @@ self.addEventListener('fetch', event => {
       const cached = await cache.match(relative);
       if (cached) return cached;
       try {
-        const response = await fetch(request, { credentials: 'omit', cache: 'no-store' });
+        const response = await fetch(request, { credentials: 'omit', cache: 'no-store', redirect: 'error' });
         if (isCacheableResponse(response)) await cache.put(relative, response.clone());
         return response;
       } catch (_) {
