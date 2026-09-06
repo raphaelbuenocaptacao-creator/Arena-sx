@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'arena-sx-';
-const CACHE_NAME = `${CACHE_PREFIX}v6-safe-shell`;
+const CACHE_NAME = `${CACHE_PREFIX}v7-private-vary-safe-shell`;
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -40,6 +40,8 @@ function isCacheableResponse(response) {
   const cacheControl = (response.headers.get('cache-control') || '').toLowerCase();
   if (cacheControl.includes('private') || cacheControl.includes('no-store')) return false;
   if (response.headers.has('set-cookie') || response.headers.has('content-range')) return false;
+  const vary = (response.headers.get('vary') || '').toLowerCase();
+  if (vary.split(',').some(value => ['cookie', 'authorization'].includes(value.trim()))) return false;
   return true;
 }
 
