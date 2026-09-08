@@ -29,7 +29,7 @@
 
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('./sw.js?v=7-private-vary-safe-shell', {
+      const registration = await navigator.serviceWorker.register('./sw.js?v=9-raster-private-vary-star-safe-shell', {
         scope: './',
         updateViaCache: 'none'
       });

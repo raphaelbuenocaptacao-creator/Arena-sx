@@ -1,12 +1,12 @@
 const CACHE_PREFIX = 'arena-sx-';
-const CACHE_NAME = `${CACHE_PREFIX}v8-private-vary-star-safe-shell`;
+const CACHE_NAME = `${CACHE_PREFIX}v9-raster-private-vary-star-safe-shell`;
 const APP_SHELL = new Set([
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.svg',
-  './icons/icon-512.svg',
-  './icons/icon-512-maskable.svg'
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-512-maskable.png'
 ]);
 const PRIVATE_PATH = /\/(api|auth|login|logout|admin|session|sessions|token|tokens|account|profile|me|supabase)(\/|\?|$)/i;
 const SENSITIVE_QUERY_KEYS = new Set([
