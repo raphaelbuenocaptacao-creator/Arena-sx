@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'arena-sx-';
-const CACHE_NAME = `${CACHE_PREFIX}v9-raster-private-vary-star-safe-shell`;
+const CACHE_NAME = `${CACHE_PREFIX}v10-raster-private-vary-range-safe-shell`;
 const APP_SHELL = new Set([
   './',
   './index.html',
@@ -41,7 +41,7 @@ function isCacheableResponse(response) {
   if (cacheControl.includes('private') || cacheControl.includes('no-store')) return false;
   if (response.headers.has('set-cookie') || response.headers.has('content-range')) return false;
   const varyValues = (response.headers.get('vary') || '').toLowerCase().split(',').map(value => value.trim()).filter(Boolean);
-  if (varyValues.some(value => value === '*' || value === 'cookie' || value === 'authorization')) return false;
+  if (varyValues.some(value => value === '*' || value === 'cookie' || value === 'authorization' || value === 'range' || value === 'if-range')) return false;
   return true;
 }
 
