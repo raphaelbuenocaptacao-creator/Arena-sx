@@ -9,6 +9,14 @@ on:
       - 'pwa-register.js'
       - 'index.html'
       - 'icons/**'
+  pull_request:
+    paths:
+      - '.github/workflows/pwa-integrate.yml'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'pwa-register.js'
+      - 'index.html'
+      - 'icons/**'
   workflow_dispatch:
 
 permissions:
@@ -23,18 +31,42 @@ jobs:
         run: |
           node --check sw.js
           node --check pwa-register.js
-      - name: Validate manifest and required icons
+      - name: Validate manifest and PNG icons
         run: |
-          node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('manifest.webmanifest')); if(!m.name||!m.short_name||!m.start_url||m.display!=='standalone'||!m.theme_color) process.exit(1); const icons=m.icons||[]; for (const size of ['192x192','512x512']) if(!icons.some(i=>i.sizes===size)) process.exit(1); if(!icons.some(i=>(i.purpose||'').includes('maskable'))) process.exit(1);"
-          test -f icons/icon-192.png
-          test -f icons/icon-512.png
-          test -f icons/icon-512-maskable.png
-      - name: Validate PWA integration
+          node <<'NODE'
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+          if(!m.name||!m.short_name||!m.start_url||!m.scope||m.display!=='standalone'||!m.theme_color||!m.background_color) process.exit(1);
+          const icons=m.icons||[];
+          for (const size of ['192x192','512x512']) if(!icons.some(i=>i.sizes===size && i.type==='image/png')) process.exit(1);
+          if(!icons.some(i=>(i.purpose||'').includes('maskable') && i.sizes==='512x512')) process.exit(1);
+          function pngSize(file){
+            const b=fs.readFileSync(file);
+            if(b.length<24 || b.toString('hex',0,8)!=='89504e470d0a1a0a') throw new Error(file+' is not PNG');
+            return [b.readUInt32BE(16), b.readUInt32BE(20)];
+          }
+          const required=[['icons/icon-192.png',192,192],['icons/icon-512.png',512,512],['icons/icon-512-maskable.png',512,512]];
+          for(const [file,w,h] of required){ const [aw,ah]=pngSize(file); if(aw!==w||ah!==h) throw new Error(`${file}: ${aw}x${ah}`); }
+          NODE
+      - name: Validate PWA integration and exact SW version
         run: |
           grep -q 'rel="manifest" href="./manifest.webmanifest"' index.html
           grep -q './pwa-register.js' index.html
           grep -q 'theme-color' index.html
-          grep -q 'serviceWorker' pwa-register.js
+          grep -q 'mobile-web-app-capable' index.html
+          grep -q 'apple-mobile-web-app-capable' index.html
+          grep -q "location.protocol === 'https:'" pwa-register.js
+          grep -q "updateViaCache: 'none'" pwa-register.js
+          grep -q 'beforeinstallprompt' pwa-register.js
+          node <<'NODE'
+          const fs=require('fs');
+          const sw=fs.readFileSync('sw.js','utf8');
+          const reg=fs.readFileSync('pwa-register.js','utf8');
+          const cache=sw.match(/CACHE_NAME\s*=\s*`\$\{CACHE_PREFIX\}([^`]+)`/);
+          const registered=reg.match(/sw\.js\?v=([^'"&]+)/);
+          if(!cache||!registered) throw new Error('Unable to extract SW versions');
+          if(cache[1]!==registered[1]) throw new Error(`SW version mismatch: cache=${cache[1]} registration=${registered[1]}`);
+          NODE
       - name: Validate private and range cache safety
         run: |
           grep -q "request.headers.has('authorization')" sw.js
@@ -43,6 +75,11 @@ jobs:
           grep -q "request.headers.has('if-range')" sw.js
           grep -q "response.headers.has('set-cookie')" sw.js
           grep -q "response.headers.has('content-range')" sw.js
+          grep -q "cacheControl.includes('private')" sw.js
+          grep -q "cacheControl.includes('no-store')" sw.js
+          grep -q "value === 'authorization'" sw.js
+          grep -q "value === 'cookie'" sw.js
           grep -q "value === 'range'" sw.js
           grep -q "value === 'if-range'" sw.js
           grep -q "key.startsWith(CACHE_PREFIX)" sw.js
+          grep -q "request.mode === 'navigate'" sw.js
